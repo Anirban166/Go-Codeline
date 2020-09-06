@@ -91,3 +91,17 @@ var r rune = 'a' // or just r := 'a'
 ```
 
 ---
+### Constants
+- Follow camelCaps to avoid exporting via variable naming.
+- Typed constants are the regular constants with type specified, can be made of all the primitives and can't be evaluated during runtime. Eg:
+```go
+// Import "math"
+const x float64 = math.Sin(1.2) // compiler error: not a constant
+```
+- Shadowing works:
+```go
+const a int16 = 10
+func main() { const a int = 12 // local
+              fmt.Printf("%v, %T\n", a, a) // 12, int 
+}
+```
