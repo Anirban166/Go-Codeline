@@ -45,6 +45,7 @@ func main() {
 }
 ```
 
+---
 ### Primitives
 - Boolean via `bool` (Eg: `a := 1 == 2` -> `false`, `a := 1 != 2` -> `true`)
 - Default is `false` for `bool`, as per its 0-value
@@ -58,7 +59,7 @@ fmt.Println(a+int(b))
 }  // O/P: 22
 ```
 - Unsigned variants follow same prefix-appended syntax eg: `uint32` (`8<->32` unsigned, `8<->64` signed)
-- Bit operations are sane as well. Eg: 
+- Bit operations are same as well. Eg: 
     - and/or:`a&b`, `a|b` 
     - only 11/00 sets: `a^b`, `a&^b`
     - bitshifts L/R: `2^10 << 10` (2<sup>10</sup> * 2<sup>10</sup> = 2048), `a >> b` (2<sup>10</sup> / 2<sup>10</sup> = 1)
@@ -88,3 +89,5 @@ b := []byte(s) // ASCII values under array []uint8
 var r rune = 'a' // or just r := 'a'
 // type int32, value 97
 ```
+
+---
