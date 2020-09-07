@@ -140,3 +140,56 @@ const( _ = iota
 ```
 
 ---
+### Arrays & Slices
+- Default syntax: `var arrayname [size]type` (functions apply directly, such as `len(arrayname) = size`)
+- For the other option, gotta use an ellpsis with the initializer for known set of values in an *array*, ex: `arrayname := [...]int{"go","golang"}`
+- Implicitly, copies are created by array assignment:
+```go
+a := [...]int{10, 12}
+b := a      
+b[1] = 20  
+// a = [10, 12], b = [10, 20]
+```
+- To avoid copies, a reference can be considered: (similar to C++)
+```go
+b := &a
+b[1] := 20
+// a = b = [10, 20]
+```
+- Remove the ellipsis and we get *slices*, where the values are determined at runtime, unlike compile-time determination for arrays: (here the copy assignment for them works like references, i.e. the address is taken) 
+```go
+a := []int{10, 12}
+b := a
+b[1] = 20
+// a = b = [10, 20]
+```
+- Slicing operations (similar to NumPy) will work both on arrays and slices: 
+```go
+a := []int{10, 20, 30} // Slice
+a := [...]int{10, 20, 30} // Array; equivalent to the slice a[:]
+b := a[n:] // slice from (n+1)th element to end
+c := a[:n] // slice first n elements
+d := a[m:n] // slice all the elements between (m,n] (m excluded)
+```
+- Can use make operator: (args include type, length, capacity)
+```go
+a := make([]int, 3) // 0-value initialization takes place: (like in C++)
+fmt.Println(a) // [0, 0, 0]
+b := make([]int, 3, 100)
+fmt.Printf("%v, %v", len(a), cap(a)) // 3 100
+```
+- Can concatenate slices via append, but for dissimilar type it throws error. For types such as integers and an array of integers, the later can be turned into the former by spreading out the values: (like in Javascript by the ellipsis)
+```go
+a := []int{}
+a = append(a, []int{3, 5, 6}...) // 
+```
+- Removing elements from slices:
+```go
+a := []int{1, 2, 3}
+b := a[:len(a)-1] // [1, 2]
+b := append(a[:1], a[2:]...) // [1, 3]
+// references to b will change a! (since copies of the array refer to same underlying array data)
+// i.e. a becomes [1, 3, 3], which is not expected. (b = [1, 3], expecting the same for a)
+```
+
+---
