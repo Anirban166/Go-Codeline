@@ -92,8 +92,9 @@ var r rune = 'a' // or just r := 'a'
 
 ---
 ### Constants
-- Follow camelCaps to avoid exporting via variable naming.
-- Typed constants are the regular constants with type specified, can be made of all the primitives and can't be evaluated during runtime. Eg:
+- Follow camelCaps to avoid exporting via variable naming. (and PascalCase for exporting)
+- Typed constants are the regular constants with type specified, interpolating with same type. (untyped variant can with similar types)
+- They can be made of all the primitives and can't be evaluated during runtime. Eg:
 ```go
 // Import "math"
 const x float64 = math.Sin(1.2) // compiler error: not a constant
@@ -105,3 +106,37 @@ func main() { const a int = 12 // local
               fmt.Printf("%v, %T\n", a, a) // 12, int 
 }
 ```
+- Enumerated constant `iota` increments subsequent values by one when used inside a constant block: (and is scoped to it, i.e. another block would reset the value)
+```go
+const(a = iota
+      b
+      c
+)
+const(d = iota)
+func main() {
+	fmt.Printf("%v\n", a) // 0
+	fmt.Printf("%v\n", b) // 1
+	fmt.Printf("%v\n", c) // 2
+	fmt.Printf("%v\n", d) // 0, from second const block
+}
+```
+- Assigning it to a blank identifier (underscore) ignores the first value:
+```go
+const( _ = iota + 5
+       a
+       b
+)
+func main() {
+	fmt.Printf("%v\n", a) // 6, from (0+5)+1
+}
+```
+- A good example (using the above) is evaluating file size using bitshift:
+```go
+const( _ = iota
+       KB = 1 << (10*iota) 
+       MB 
+       GB
+)
+```
+
+---
