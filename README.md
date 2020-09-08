@@ -225,7 +225,7 @@ if pop, ok := contactList["John"]; ok { // If entry with key as "John" exists in
 ### Control Flow
 - Going as per the `if` block syntax, no `()` brackets required (similar to python), but note that they need `{ }`, even for the commands within a single line.
 - Use of logical and relational operators stay the same, example: `if n < 25 || n > 50 {...}` is equivalent to `if n >= 25 && n <= 50 {...}`.
-- Note that go follows short-circuiting, such as for multiple or (logical or, stitched together by `||`) conditions in an `if` test, if one of the conditions returns a true, then the rest of the chained or conditions won't be evaluated (similar to lazy evaluation in R). 
+- Note that go follows short-circuiting, such as for multiple `or` (logical OR, stitched together by `||`) conditions in an `if` test, if one of the conditions returns a true, then the rest of the chained `or` conditions won't be evaluated (similar to lazy evaluation in R). 
 - else and nested if-else blocks are the same as expected.
 - Due to rounding-off of decimal places, such a computation won't be true: (whilst it is expected to be true, which absolutely holds for any solid integer or even unary decimals)
 ```go
@@ -247,3 +247,64 @@ fmt.Println("different")
 }
 // same
 ```
+- Switches in go relatively the same as well, with a few exceptions/advantages:
+	- No `break` statements are required! But for exclusively neglecting logic from a point within a case, a `break` can be used explicitly.
+	- Delimiters of a case are the next cases, which implies no use of curly braces or `{ }` is required to enclose multiple statements for a case.
+	- Multiple cases can be considered together in one `case` segment, thereby discarding the use of subsequent cases that fall under the same category. (which were the fall-through cases in other languages, with multiple cases adorning the same code with the ones which fall under the same being left blank or carry-forwarded to the next case `case 1: case 2: case 3: some code for all the 3 cases`)
+```go
+switch i:=5*3;i {
+case 15:
+        fmt.Println("15? Hell yeah")
+case 1, 3, 7, 9, 11, 13: // multiple cases chained together
+	fmt.Println("Odds uptil 15, but not 15")
+case 2, 4, 6, 8, 10, 12, 14:
+	fmt.Println("Evens uptil 15 (not 15, of course)")	
+default:	
+	fmt.Println("0 or a number > 15")	
+} // 15? Hell yeah
+```
+- Note that here the cases cannot overlap, hence we had to make a distinct case for each of the numbers seperately. If we were to use the tag sytax, they can overlap:
+```go
+i := 15
+switch i {
+case i <= 15:
+	fmt.Println("True")
+case i <= 20:
+	fmt.Println("True as well")
+default:
+	fmt.Println("False")
+} // True
+// Here both i <= 15, <= 20 apply and the first result shadows the second.
+```
+- In order to print both the results for the above, a `fallthrough` can be added to the first case:
+```go
+...
+case i <= 15:
+	fmt.Println("True")
+	fallthrough
+case i <= 20:
+	fmt.Println("True as well")
+	...
+	// True
+	// True as well
+```
+However note that `fallthrough` triggers the next case as true even if the condition is false, i.e. even a condition like `i <= 10` would make it false.  
+- One example with interfaces:
+```go
+var i interface{} = [3]int{} 
+switch i.(type) {
+case int:
+	fmt.Println("Integer") // e.g. i = 1
+case float64:
+	fmt.Println("Float64") // e.g. i = 1.01
+case string:
+	fmt.Println("String") // e.g. i = "1"
+case [2]int:
+	fmt.Println("Integer array of size 2") // e.g. i = [2]int{}
+default:
+	fmt.Println("Other type")
+} // Other type
+// since for an array to be equal, sizes must be the same.
+```
+
+---
