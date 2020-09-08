@@ -203,7 +203,7 @@ b := append(a[:1], a[2:]...) // [1, 3]
 ```go
 fmt.Println(contactList["Newperson"]) // 0
 ```
-- The way to go about this (which would create visible confusion in my example, such as whether the "Newperson" key has a contact number of 0, or whether the entry even exists) is to use a variable such as `ok` (similar to HTTP-200. jk) along which factors out a boolean indicating if that entry is present in the map or not: (true or false respectively)
+- The way to go about this (which would create visible confusion in my example, such as whether the "Newperson" key has a contact number of 0, or whether the entry even exists) is to use a variable such as `ok` (similar to HTTP-200. jk) which factors out a boolean indicating if that entry is present in the map or not: (true or false respectively)
 ```go
 pop, ok := contactList["Newperson"]
 fmt.Println(pop, ok) // 0, false -> invalid/non-existent entry
@@ -214,5 +214,36 @@ fmt.Println(pop, ok) // 5400323467, true -> invalid/non-existent entry
 _, ok := contactList["Alexandra"]
 fmt.Println(ok) // true 
 ```
+- Can use with if-statements: (as discussed below)
+```go
+if pop, ok := contactList["John"]; ok { // If entry with key as "John" exists in map
+	fmt.Println(pop) // John's number
+}
+```
 
 ---
+### Control Flow
+- Going as per the `if` block syntax, no `()` brackets required (similar to python), but note that they need `{ }`, even for the commands within a single line.
+- Use of logical and relational operators stay the same, example: `if n < 25 || n > 50 {...}` is equivalent to `if n >= 25 && n <= 50 {...}`.
+- Note that go follows short-circuiting, such as for multiple or (logical or, stitched together by `||`) conditions in an `if` test, if one of the conditions returns a true, then the rest of the chained or conditions won't be evaluated (similar to lazy evaluation in R). 
+- else and nested if-else blocks are the same as expected.
+- Due to rounding-off of decimal places, such a computation won't be true: (whilst it is expected to be true, which absolutely holds for any solid integer or even unary decimals)
+```go
+num := 0.143
+if num == math.Pow(math.Sqrt(num, 2)) { 
+fmt.Println("same")
+} else {
+fmt.Println("different")
+}
+// different 
+```
+- A better way to check for the above would be to check for the difference between the expected and computed values within a threshold (typical based on the extent of decimal points):
+```go
+num := 0.143
+if maths.Abs(num / math.Pow(math.Sqrt(num, 2)) - 1 < 0.001 { 
+fmt.Println("same")
+} else {
+fmt.Println("different")
+}
+// same
+```
