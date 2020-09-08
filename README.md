@@ -193,3 +193,26 @@ b := append(a[:1], a[2:]...) // [1, 3]
 ```
 
 ---
+### Maps 
+- Syntax: `mapname := map[keytype]valuetype{ k-v pairs }`. Ex: `contactList := map[string]int{"John": 5400323467, "Doe": 5674322119}` 
+	- Access is similar to normal map syntax, by the key e.g. `contactList["John"]` gives `5400323467`
+	- Adding is simple as well `contactList["Alexandra"] = 9235707791`
+	- Removing elements/pairs can be done via the `delete` function: `delete(contactList, "Doe")`
+- Can initialize without values using `make`: `mapname := make(map[keytype]valuetype)` 
+- While accessing via `mapname[keyname]`, even keys/entries not present (deleted entries are taken into account as well) are returned as 0 when printed. Such as for the above example, random keys not present would give 0:
+```go
+fmt.Println(contactList["Newperson"]) // 0
+```
+- The way to go about this (which would create visible confusion in my example, such as whether the "Newperson" key has a contact number of 0, or whether the entry even exists) is to use a variable such as `ok` (similar to HTTP-200. jk) along which factors out a boolean indicating if that entry is present in the map or not: (true or false respectively)
+```go
+pop, ok := contactList["Newperson"]
+fmt.Println(pop, ok) // 0, false -> invalid/non-existent entry
+pop, ok := contactList["John"]
+fmt.Println(pop, ok) // 5400323467, true -> invalid/non-existent entry
+```
+```go
+_, ok := contactList["Alexandra"]
+fmt.Println(ok) // true 
+```
+
+---
