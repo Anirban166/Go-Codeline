@@ -288,7 +288,7 @@ case i <= 20:
 	// True
 	// True as well
 ```
-However note that `fallthrough` triggers the next case as true even if the condition is false, i.e. even a condition like `i <= 10` would make it false.  
+However note that `fallthrough` triggers the next case as true even if the condition is false, i.e. even a condition like `i <= 10` would make it execute the second case.  
 - One example with interfaces:
 ```go
 var i interface{} = [3]int{} 
@@ -305,6 +305,74 @@ default:
 	fmt.Println("Other type")
 } // Other type
 // since for an array to be equal, sizes must be the same.
+```
+
+---
+### Looping
+- Go has only for loops :)
+- Cut the brackets (like the `if`) and the `for` loops are the same, storing the same 3 aspects (initialization, condition, increment/decrement) seperated by `;`.
+- Multiple variables have to be initialized and incremented/decremented in conjunction with each other, i.e. by seperating with `,` for first the variables, then the initialization/inc./dec. part: (The ordinary `for i:=0, j:=0, i < 2; i++, j++ {...}` is invalid)
+```go
+for i, j := 0, 0; i < 10; i, j = i+1, j+1 { 
+	fmt.Println(i, j) 
+}
+```
+- Note that we can't use `i++` and `j++` above since they won't be treated as a statement. (could use them for one variable tho, such as `i++`/`j++` for `i`/`j` only)
+- Pre-default initialization of loop variable and going without the initializer works in go as well: (implied initialization)
+```go
+i := 0
+for ; i < 10 ; i++ {...}
+```
+- More syntactic sugar, to comply with a while:
+```go
+i := 0
+for i < 10 {
+	...
+	i++
+}
+```
+- Do-while equivalent:
+```go
+i := 0
+for {
+	...
+	i++
+	if(i == 10) { 
+		break
+	}
+}
+```
+- Can use labels to break out from a precise point or loop stage:
+```go
+Loop:
+	for i := 1; i <= 10; i++ {
+		for l := 1; j <= 10; j++ {
+			if i * j >= 50 {
+				break Loop
+			}
+		}
+	}
+```
+- For-ranged ftw! (always with key-value syntax, `for key, value := range collectionName {...}`)
+```go
+slice := []int{10, 12}
+for key, value := range slice {
+	fmt.Println(key, value)
+} // key -> index here, value -> element at index of slice
+// 1, 10
+// 2, 12
+```
+- Using it for traversing our map above, we can go with only keys: (can't have `for k, v`, just the `k` is required)
+```go
+for k := range contactList {
+	fmt.Println(k)
+}
+```
+- or only the values as well, instead of the using keys & values: (can't have just the `v`)
+```go
+for _, v := range contactList{
+	fmt.Println(v)
+}
 ```
 
 ---
