@@ -1,6 +1,7 @@
 # Go-Codeline
 
-Noting down stuff as I learn Go. | 06/09/20 
+| Noting down stuff as I learn Go. | 06/09/20 |
+|---|---|
 
 ### Variables
 
@@ -68,7 +69,7 @@ fmt.Println(a+int(b))
     - Operations supported include `/, *, +, -`
     - `real()` & `imag()` give desired components with `size/2` (64 for 128, 32 for 64) 
     - can use `complex` function as an alternative. (eg: `var n complex128 = complex(10, 12)`) //10+12i
-- Strings (utf-8) in go are immutable (can't be changed), can be concatenated with `+` and are aliases for bytes. Eg:
+- Strings (utf-8) in Go are immutable (can't be changed), can be concatenated with `+` and are aliases for bytes. Eg:
 ```go
 a := "Fit"
 fmt.Printf("%v, %T", a[1], a[1]) // 105, uint8 
@@ -225,7 +226,7 @@ if pop, ok := contactList["John"]; ok { // If entry with key as "John" exists in
 ### Control Flow
 - Going as per the `if` block syntax, no `()` brackets required (similar to python), but note that they need `{ }`, even for the commands within a single line.
 - Use of logical and relational operators stay the same, example: `if n < 25 || n > 50 {...}` is equivalent to `if n >= 25 && n <= 50 {...}`.
-- Note that go follows short-circuiting, such as for multiple `or` (logical OR, stitched together by `||`) conditions in an `if` test, if one of the conditions returns a true, then the rest of the chained `or` conditions won't be evaluated (similar to lazy evaluation in R). 
+- Note that Go follows short-circuiting, such as for multiple `or` (logical OR, stitched together by `||`) conditions in an `if` test, if one of the conditions returns a true, then the rest of the chained `or` conditions won't be evaluated (similar to lazy evaluation in R). 
 - else and nested if-else blocks are the same as expected.
 - Due to rounding-off of decimal places, such a computation won't be true: (whilst it is expected to be true, which absolutely holds for any solid integer or even unary decimals)
 ```go
@@ -374,5 +375,43 @@ for _, v := range contactList{
 	fmt.Println(v)
 }
 ```
+
+---
+### Pointers
+- Basics:
+```go
+var a int = 10
+var b *int = &a // declare a pointer 'b', pointing to memory address of a
+fmt.Println(a, *b) // *b -> dereference b (by prefixing with asterisk) and return the value at the memory address pointed by b
+// 42 42
+// For printing the address, go with b or &a, like the regular syntax.
+```
+- Pointer arithmetic is not supported (adheering to its 'simplicity' principle) by default, but can be achieved via the `unsafe` package.
+- Zero value of a pointer is `nil`:
+```go
+func main() {
+	var es *exampleStruct
+	fmt.Println(es) // <nil>
+	es = new(exampleStruct)
+	fmt.Println(es) // &{0}
+}
+type exampleStruct struct {
+	a int
+}
+```
+- For dereferencing the pointer above, we would require to usually emplace brackets to it since the precedence of `*` is lower to `.`, and hence we would have to go with `(*es).a` to access the value of the struct member `a`:
+```go
+func main() {
+	var es *exampleStruct
+	es = new(exampleStruct)
+	(*es).a = 10 // n
+	fmt.Println((*es).a) // 10
+}
+type exampleStruct struct {
+	a int
+}
+```
+- However, Go's compiler automatically dereferences it for us while using complex types such as structs above, and so even `es.a` would work!
+- Note that all assignment operations in Go are copy operations, but slices and maps contain internal pointers implying that the copies point to same underlying data. 
 
 ---
