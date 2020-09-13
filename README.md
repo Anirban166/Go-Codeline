@@ -415,3 +415,132 @@ type exampleStruct struct {
 - Note that all assignment operations in Go are copy operations, but slices and maps contain internal pointers implying that the copies point to same underlying data. 
 
 ---
+### Functions
+- Starts with the 'func' keyword, with a typical syntax of `func functionName(variableName type, ...) returnType {...}` (no need to specify the return type for functions that don't return anything)
+- Concering arguments of same type, a comma delimited list of variables with the type at the end works as well, such as for ex: `func Test(firstName, lastName string)`.
+- Passing by reference (w/pointers) works as expected: (again, directly applicable to slices & maps)
+```go
+func main() {
+	firstName := "Raven"
+	lastName := "West"
+	Greet(&firstName, &lastName)
+	fmt.Println(*lastName) 
+}
+func Greet(firstName, lastName *string) {
+	*lastName := "East"
+	fmt.Println(*lastName)
+} // East
+ //  East 
+```
+- Variadics have to be the end argument: (similar to C++)
+```go
+func main() {
+	product("Product of first 10 primes: ", 2, 3, 5, 7, 11, 13, 17, 19, 23, 29)
+}
+func product(message string, values ...int) {
+	result := 0
+	for _, v := range values {
+		result *= v
+	}	
+	fmt.Println(message, result)
+} // Product of first 10 primes: 6,46,96,93,230
+```
+- Named result parameters can be used with `return`: 
+```go
+func main() {
+	p := product(, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29)
+	fmt.Println("Product of first 10 primes: ", p)
+}
+func product(values ...int) (result int) {
+	for _, v := range values {
+		result *= v
+	}	
+	return
+} // Product of first 10 primes: 6,46,96,93,230
+```
+- Addresses of local variables can be returned and are automatically promoted from the local memory (stack) to the shared memory (heap).
+- Can return multiple variables by specifying their types together: (error type as well)
+```go
+func main() {
+	d, err := divide(10.0, 0.0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Division result: ", d)
+}
+func divide(x, y float64) (float64, error) {
+	if y == 0.0 {
+		return 0.0, fmt.Errorf("Division by zero error (Inf)")
+	}
+	return x / y, nil
+} // Division result: 10.0
+```
+- Temporary/Anonymous functions (like lambdas in C++) can be created to take advantage of an isolated scope whenever required:
+```go
+func main() {
+	// Immediately invoking it:
+	func() {
+		fmt.Println(1)
+	} ()
+	// Working with the function as a variable:
+	f := func() { // signature of var f func() 
+		fmt.Println(2)
+	} 
+	f()
+}
+```
+- Can apply that to our function above: 
+```go
+func main() {
+	var divide func(float64, float64) (float64, error) 
+	divide = func(x,y float64) (float64, error) {
+		if y == 0.0 {
+			return 0.0, fmt.Errorf("Division by zero error (Inf)")
+		} else {
+			return x / y, nil
+		}
+	} 
+	d, err := divide(10.0, 0.0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Division result: ", d) // Division result: 10.0
+}
+```
+- Methods in Go are functions executing in a known context: (like for the types of a struct)
+```go
+func main() {
+	g := greeter{
+		greeting: "Hello",
+		name: "Raven",
+	}
+	g.greet() // Hello Raven
+}
+type greeter struct {
+	greeting string
+	name string
+}
+func (g greeter) greet() {
+	fmt.Println(g.greeting, g.name)
+}
+```
+Note that we are operating on a copy of the `greeter` object above, and hence values changed inside the scope of `greet()` won't have any effect on the values at the calling end. Can use a pointer reciever to change the value:
+```go
+func main() {
+	g := greeter{
+		greeting: "Hello",
+		name: "Raven",
+	}
+	g.greet() // Hello!
+}
+type greeter struct {
+	greeting string
+	name string
+}
+func (g *greeter) greet() {
+	fmt.Println(g.greeting, g.name)
+	g.name = "!"
+}
+```
