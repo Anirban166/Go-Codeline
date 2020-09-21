@@ -544,3 +544,31 @@ func (g *greeter) greet() {
 	g.name = "!"
 }
 ```
+
+---
+### Interfaces
+- Implements methods, instead of data, as expected. (like Java or C#)
+- Implicitly implemented. (doesn't need keywords like `implements`, sorry Java)
+- Implementing interface with a struct:
+```go
+func main() {
+	var w Writer = ConsoleWriter{}
+	w.Write([]byte("Heya!")) // Heya!
+}
+// Defining method signatures inside an interface:
+type Writer interface {
+	Write([]byte) (int, error)
+}
+type ConsoleWriter struct {}
+func(cw, ConsoleWriter) Write (data []byte) (int, error) {
+	n, err := fmt.Println(string(data))
+	return n, err
+}
+```
+- Single method interfaces are some of the most powerful and flexible. Examples from the standard library inlcude `io.Writer`, `io.Reader` (one method each) and `interface{}` (the empty interface with no methods, which every type in Go implements)
+- Avoid exporting interfaces for types that will be consumed, as a best practice. (export for types that will be used by the package)
+- Type conversion example:
+```go
+var wc WriterCloser := NewBufferedWriterCloser()
+bwc := wc.(*BufferedWriterCloser)
+```
