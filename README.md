@@ -572,3 +572,25 @@ func(cw, ConsoleWriter) Write (data []byte) (int, error) {
 var wc WriterCloser := NewBufferedWriterCloser()
 bwc := wc.(*BufferedWriterCloser)
 ```
+
+---
+### Goroutines
+- Basically functions or methods that run concurrently with other functions or methods.
+- Go uses green threads, similar to Erlang. (not OS threads, such as in Java/C#)
+- `go` is the keyword, and here's a basic example:  
+```go
+import (
+	"fmt"
+	"time"
+)
+func main() {
+	var message = "hey"
+	// Creating a temporary/anonymous function (Go style lambdas lol)
+	go func() {
+		fmt.Println(message)
+	}()
+	message = "hi"
+	time.Sleep(100 * time.Millisecond)
+} // hi
+```
+Here the Go scheduler is not gonna interrupt the main thread until it hits the `Sleep()` call. The value of `message` gets re-assigned before it gets printed in the goroutine, which becomes a rather good example of a race condition. (which we desire to avoid)
