@@ -577,7 +577,7 @@ bwc := wc.(*BufferedWriterCloser)
 ### Goroutines
 - Basically functions or methods that run concurrently with other functions or methods.
 - Go uses green threads, similar to Erlang. (not OS threads, such as in Java/C#)
-- `go` is the keyword, and here's a basic example:  
+- `go` is the keyword to prefix with, and here's a basic example:  
 ```go
 import (
 	"fmt"
@@ -594,3 +594,26 @@ func main() {
 } // hi
 ```
 Here the Go scheduler is not gonna interrupt the main thread until it hits the `Sleep()` call. The value of `message` gets re-assigned before it gets printed in the goroutine, which becomes a rather good example of a race condition. (which we desire to avoid)
+- Wait group (from `sync`) objects can be created to avoid skipping of output and manage goroutines via a counter:
+```go
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+func main() {
+	var wg sync.WaitGroup 
+	wg.Add(1) // +1 for 1 goroutine
+	go func() { // anonymous func.
+		count("Count value")
+		wg.Done() - 1 from waitgroup counter
+	}()
+	wg.Wait() // counter 0, done
+}
+func count(thing string) {
+	for i := 1; i <= 3; i++ {
+		fmt.Println(i, thing)
+		time.Sleep(time.Millisecond * 300)
+	}
+}
+```
