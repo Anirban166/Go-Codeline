@@ -700,8 +700,8 @@ Also note that 1 OS thread per core is a mimimum, but the number can be increase
 ### Channels
 - Declare with the `chan` keyword and by using the `make` function, in either a buffered or unbuffered composition:
 ```go
-ch := make(chan int)
-
+c := make(chan int) // unbuffered
+c := make(chan int, 100) // buffered
 ```
 - A simple program to send and recieve an integer via channels (with wait groups):
 ```go
@@ -742,7 +742,7 @@ func main() {
 	wg.Wait()
 } // 10
 ```
--
+Adding one more integer to send/recieve:
 ```go
 var wg = sync.WaitGroup{}
 func main() {
@@ -786,5 +786,37 @@ func main() {
 } // 10
  // 12
 ```
+- For Goroutines that potentially waste time awaiting for others, `select` would make the readily available recieve channels throw output:
+```go
+import (
+	"fmt"
+	"time"
+)
+func main() {
+	c1 := make(chan string)
+	c2 := make(chan string)
+	go func() {
+		for {
+			time.Sleep(time.Millisecond * 500)
+			c1 <- "Every 500ms"
+		}
+	}()
+	go func() {
+		for {
+			time.Sleep(time.Second * 2)
+			c2 <- "Every two seconds"
+		}
+	}()
+	for {
+		select {
+		case msg1 := <-c1:  
+			fmt.Println(msg1)
+		case msg2 := <-c2:
+			fmt.Println(msg2)
+		}
+	}
+}
+```
+Here c1 recieves faster than c2, and it would have been slowed down to wait for c2 if not selectively picked based on availability.
 
 ---
