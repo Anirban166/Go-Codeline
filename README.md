@@ -377,6 +377,34 @@ for _, v := range contactList{
 ```
 
 ---
+### Defer
+- `Defer` moves the execution of the deferred function (note that it doesn't take actually take a function, but rather a function call instead) to the end of the main function, precisely after the main function code is executed, but before it is returned:
+```go
+func main() {
+	fmt.Println("a")
+	defer fmt.Println("b")
+        fmt.Println("c")
+} // a-c-b order result
+```
+- Deferred functions are executed in LIFO order: (makes sense to close resources in reverse order)
+```go
+func main() {
+	defer fmt.Println("a")
+	defer fmt.Println("b")
+        defer fmt.Println("c")
+} // c-b-a order result
+```
+- It allows the opening and closing of a resource right next to each other.
+- Arguments of a function call are evaluated at the time defer is executed, but not at the time of called function's execution:
+```go
+func main() {
+	x := "a"
+	defer fmt.Println(x)
+        x = "b"
+} // a
+```
+
+---
 ### Pointers
 - Basics:
 ```go
