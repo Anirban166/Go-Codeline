@@ -19,14 +19,14 @@ package main
 import ("fmt")
 var i int = 10
 func main() {
-  fmt.Println(i)
+        fmt.Println(i)
 	var i int = 20
 	fmt.Println(i)
 } 
 // 10
 // 20
 ```
-- Local variable(s) declared but left unused throw compile time error(s). (prefer the instant detection without compilation from IDEs such as in Eclipse, but okay)
+- Local variable(s) declared but left unused throw compile time error(s). 
 - Go variable cases:
   - Capital cased variables at the package level are global & exported to other packages.<sup>1</sup>
   - Lower cased versions of the above are local/available/restricted to the package.<sup>2</sup>
@@ -695,3 +695,96 @@ func main() {
 ```
 And so yep, `GOMAXPROCS(1)` would mean parallelism doesn't exist because only one core is being alotted/available.
 Also note that 1 OS thread per core is a mimimum, but the number can be increased and we can have values like `GOMAXPROCS(100)` or higher. But it might lead to the scheduler being overloaded with more threads to look after, and in turn can make the go application a lot slower. 
+
+---
+### Channels
+- Declare with the `chan` keyword and by using the `make` function, in either a buffered or unbuffered composition:
+```go
+ch := make(chan int)
+
+```
+- A simple program to send and recieve an integer via channels (with wait groups):
+```go
+var wg = sync.WaitGroup{}
+func main() {
+	c := make(chan int)
+	wg.Add(2)
+	go func() {
+		i := <- c
+		fmt.Println(i)
+		c <- 12
+		wg.Done()
+	}()
+	go func() {
+		c <- 10
+		fmt.Println(<-c) 
+		wg.Done()
+	}()
+	wg.Wait()
+} // 10
+ // 12
+```
+- Channels are bidirectional, but we usually use them one way (send data to a channel i.e. `chan<-` or recieve data from a channel i.e. `<-chan`). An example of composing send-only and recieve-only channels:
+```go
+var wg = sync.WaitGroup{}
+func main() {
+	c := make(chan int)
+	wg.Add(2)
+	go func(c <-chan int) { // recieve-only channel
+		i := <- c
+		fmt.Println(i)
+		wg.Done()
+	}(c) // bi-directional channel is cast into an unidirectional one
+	go func(c chan<- int) { // send-only channel
+		c <- 10
+		wg.Done()
+	}(c)
+	wg.Wait()
+} // 10
+```
+-
+```go
+var wg = sync.WaitGroup{}
+func main() {
+	c := make(chan int, 100) // Buffered channel, able to store 100 integers
+	wg.Add(2)
+	go func(c <-chan int) { // recieve-only channel
+		i := <- c
+		fmt.Println(i)
+		i = <- c
+		fmt.Println(i)
+		wg.Done()
+	}(c) // bi-directional channel is cast into an unidirectional one
+	go func(c chan<- int) { // send-only channel
+		c <- 10
+		c <- 12
+		wg.Done()
+	}(c)
+	wg.Wait()
+} // 10
+ // 12
+```
+Can enclose the recieving channel entities in a for loop, but will need to ensure the sender is closed in order to avoid a deadlock:
+```go
+var wg = sync.WaitGroup{}
+func main() {
+	c := make(chan int, 100) // Buffered channel, able to store 100 integers
+	wg.Add(2)
+	go func(c <-chan int) { // recieve-only channel
+		for i := range c {
+			fmt.Println(i)
+		}
+		wg.Done()
+	}(c) // bi-directional channel is cast into an unidirectional one
+	go func(c chan<- int) { // send-only channel
+		c <- 10
+		c <- 12
+		close(c)
+		wg.Done()
+	}(c)
+	wg.Wait()
+} // 10
+ // 12
+```
+
+---
