@@ -612,7 +612,7 @@ import (
 	"time"
 )
 func main() {
-	var message = "hey"
+	var message = "hey" // The concept of closures apply, the anonymous function has access to this variable or ones available in this outer scope (rc invoked)
 	// Creating a temporary/anonymous function (Go style lambdas lol)
 	go func() {
 		fmt.Println(message)
@@ -621,7 +621,24 @@ func main() {
 	time.Sleep(100 * time.Millisecond)
 } // hi
 ```
-Here the Go scheduler is not gonna interrupt the main thread until it hits the `Sleep()` call. The value of `message` gets re-assigned before it gets printed in the goroutine, which becomes a rather good example of a race condition. (which we desire to avoid)
+Here the Go scheduler is not gonna interrupt the main thread until it hits the `Sleep()` call. The value of `message` gets re-assigned before it gets printed in the goroutine, which becomes a rather good example of a race condition. (which we desire to avoid) <br>
+A simple way to avoid this would be to use an argument and pass it by value: (a copy of the variable `message` when it gets passed onto the goroutine)
+```go
+import (
+	"fmt"
+	"time"
+)
+func main() {
+	var message = "hey" // The concept of closures apply, the anonymous function has access to this variable or ones available in this outer scope (rc invoked)
+	// Creating a temporary/anonymous function (Go style lambdas lol)
+	go func(message string) {
+		fmt.Println(message)
+	}(message)
+	message = "hi"
+	time.Sleep(100 * time.Millisecond)
+} // hey
+```
+Note that this is a bad practice since we are binding it to the real-world clock with the `Sleep()` call, making the program unreliable. Wait groups are a better alternative.
 - Wait group (from `sync`) objects can be created to avoid skipping of output and manage goroutines via a counter:
 ```go
 import (
@@ -645,3 +662,36 @@ func count(thing string) {
 	}
 }
 ```
+Replicating this, we can solve the above problem with wait groups:
+```go
+import (
+	"fmt"
+	"sync"
+)
+var wg = sync.WaitGroup{}
+func main() {
+	var message = "hey" // The concept of closures apply, the anonymous function has access to this variable or ones available in this outer scope (rc invoked)
+	wg.Add(1)
+	// Creating a temporary/anonymous function (Go style lambdas lol)
+	go func(message string) {
+		fmt.Println(message)
+		wg.Done()
+	}(message)
+	message = "hi"
+	wg.Wait()
+} // hey
+```
+- Other modes of synchronization include `sync.Mutex` and `sync.RWMutex` to protect data access. (better to lock together and unlock together in some cases)
+- Goroutines start with very small stack spaces, but can be re-allocated very quickly. (cheap to create and destroy)
+- `GOMAXPROCS` from the `runtime` package gives the number of CPU threads allocated for go to use, which are equal to the number of cores in the machine: (if running on a VM, number of cores exposed apply. Eg: Go playground has one core)
+```go
+import(
+       "fmt"
+       "runtime"
+      )
+func main() {
+	fmt.Printf("Threads: %v\n", runtime(GOMAXPROCS(-1)) // -1 by default takes all cores available in the machine.
+}
+```
+And so yep, `GOMAXPROCS(1)` would mean parallelism doesn't exist because only one core is being alotted/available.
+Also note that 1 OS thread per core is a mimimum, but the number can be increased and we can have values like `GOMAXPROCS(100)` or higher. But it might lead to the scheduler being overloaded with more threads to look after, and in turn can make the go application a lot slower. 
